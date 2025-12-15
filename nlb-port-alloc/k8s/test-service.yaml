@@ -1,0 +1,46 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: game-room-1
+  namespace: default
+  annotations:
+    nlb.port-manager/auto-assign: "true"
+spec:
+  selector:
+    app: game-room-1
+  ports:
+    - protocol: TCP
+      port: 7777
+      targetPort: 7777
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: game-room-1
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: game-room-1
+  template:
+    metadata:
+      labels:
+        app: game-room-1
+    spec:
+      containers:
+      - name: game-server
+        image: nginx:latest
+        ports:
+        - containerPort: 7777
+          protocol: TCP
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+

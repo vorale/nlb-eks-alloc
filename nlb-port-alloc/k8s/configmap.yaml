@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nlb-port-operator-config
+  namespace: kube-system
+data:
+  NLB_ARN: "arn:aws:elasticloadbalancing:us-west-2:ACCOUNT_ID:loadbalancer/net/YOUR-NLB-NAME/XXXXXXXXXXXXXXXX"
+  VPC_ID: "vpc-xxxxxxxxxxxxxxxxx"
+  PORT_RANGE_MIN: "30000"
+  PORT_RANGE_MAX: "32767"
+  DEFAULT_PORT_SPEC: "80/TCP"  # 默认端口规格（端口/协议）
+

@@ -1,0 +1,28 @@
+---
+# UDP 协议测试 Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: udp-server-1
+  namespace: default
+  annotations:
+    nlb.port-manager/auto-assign: "true"
+    nlb.port-manager/port: "5000/UDP"
+  labels:
+    app: udp-server
+spec:
+  containers:
+  - name: udp-server
+    image: alpine:latest
+    ports:
+    - containerPort: 5000
+      protocol: UDP
+    command: ["/bin/sh", "-c"]
+    args:
+    - |
+      echo "Starting UDP echo server on port 5000..."
+      # 简单的 UDP 回显服务
+      while true; do
+        nc -u -l -p 5000 -e echo "UDP Response"
+        sleep 1
+      done

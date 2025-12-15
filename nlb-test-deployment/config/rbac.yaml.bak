@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nlb-port-operator
+  namespace: kube-system
+  annotations:
+    # 替换为实际的 IAM Role ARN
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/nlb-port-operator-role
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: nlb-port-operator
+rules:
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "list", "watch", "update", "patch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch", "patch", "update"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: nlb-port-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nlb-port-operator
+subjects:
+- kind: ServiceAccount
+  name: nlb-port-operator
+  namespace: kube-system

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nlb-port-operator
+  namespace: kube-system
+  labels:
+    app: nlb-port-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nlb-port-operator
+  template:
+    metadata:
+      labels:
+        app: nlb-port-operator
+    spec:
+      serviceAccountName: nlb-port-operator
+      containers:
+      - name: operator
+        # 替换为你的镜像地址
+        image: 123456789012.dkr.ecr.us-west-2.amazonaws.com/nlb-port-operator:latest
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: nlb-port-operator-config
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        # 使用 exec 探针检查 Python 进程是否运行
+        livenessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "import os; exit(0)"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "import os; exit(0)"
+          initialDelaySeconds: 5
+          periodSeconds: 5

@@ -1,0 +1,14 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.git
+.gitignore
+k8s/
+*.md
+setup-irsa.sh
+iam-policy.json
+.dockerignore
+

@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nlb-port-operator
+  namespace: kube-system
+  annotations:
+    # 替换为实际的 IAM Role ARN
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/nlb-port-operator-role
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: nlb-port-operator
+rules:
+# 核心资源
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "list", "watch", "update", "patch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch", "patch", "update"]
+- apiGroups: [""]
+  resources: ["pods/status"]
+  verbs: ["get", "patch", "update"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list", "watch"]
+# kopf 框架所需权限
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "list", "watch"]
+# kopf 状态存储（使用 configmaps）
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: nlb-port-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nlb-port-operator
+subjects:
+- kind: ServiceAccount
+  name: nlb-port-operator
+  namespace: kube-system

@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-scaling-gateway
+  namespace: default
+  labels:
+    app: test-scaling-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-scaling-gateway
+  template:
+    metadata:
+      labels:
+        app: test-scaling-gateway
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        env:
+        - name: GATEWAY_ID
+          value: "scaling-gateway"
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          echo "Scaling Gateway Server - Port: 80" > /usr/share/nginx/html/index.html
+          echo "Gateway ID: scaling-gateway" >> /usr/share/nginx/html/index.html
+          echo "Pod IP: $(hostname -i)" >> /usr/share/nginx/html/index.html
+          echo "Started at: $(date)" >> /usr/share/nginx/html/index.html
+          nginx -g 'daemon off;'
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-scaling-gateway
+  namespace: default
+  annotations:
+    nlb.port-manager/auto-assign: "true"
+  labels:
+    app: test-scaling-gateway
+spec:
+  selector:
+    app: test-scaling-gateway
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP

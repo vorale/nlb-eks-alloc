@@ -1,0 +1,60 @@
+---
+# Pod Mode 测试 - 使用 Pod 注解进行端口分配
+# 此测试用例验证多个 Pod 独立获得 NLB 端口分配
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gateway-pod-1
+  namespace: default
+  annotations:
+    nlb.port-manager/auto-assign: "true"
+  labels:
+    app: gateway
+    instance: "1"
+spec:
+  containers:
+  - name: gateway
+    image: nginx:alpine
+    ports:
+    - containerPort: 80
+    env:
+    - name: GATEWAY_ID
+      value: "gateway-1"
+    command: ["/bin/sh", "-c"]
+    args:
+    - |
+      echo "Gateway Pod 1 - Port: 80" > /usr/share/nginx/html/index.html
+      echo "Gateway ID: gateway-1" >> /usr/share/nginx/html/index.html
+      echo "Pod Name: gateway-pod-1" >> /usr/share/nginx/html/index.html
+      echo "Pod IP: $(hostname -i)" >> /usr/share/nginx/html/index.html
+      nginx -g 'daemon off;'
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gateway-pod-2
+  namespace: default
+  annotations:
+    nlb.port-manager/auto-assign: "true"
+  labels:
+    app: gateway
+    instance: "2"
+spec:
+  containers:
+  - name: gateway
+    image: nginx:alpine
+    ports:
+    - containerPort: 80
+    env:
+    - name: GATEWAY_ID
+      value: "gateway-2"
+    command: ["/bin/sh", "-c"]
+    args:
+    - |
+      echo "Gateway Pod 2 - Port: 80" > /usr/share/nginx/html/index.html
+      echo "Gateway ID: gateway-2" >> /usr/share/nginx/html/index.html
+      echo "Pod Name: gateway-pod-2" >> /usr/share/nginx/html/index.html
+      echo "Pod IP: $(hostname -i)" >> /usr/share/nginx/html/index.html
+      nginx -g 'daemon off;'
